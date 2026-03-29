@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: learn-spring
+  datasource:
+    url: jdbc:mysql://localhost:3306/business_manager
+    username: root
+    password: Manh@2026!
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+app:
+  jwt:
+    secret: business_manager2026
+    expiration-ms: 86400000
+
+
+springdoc:
+  api-docs:
+    path: /api-docs

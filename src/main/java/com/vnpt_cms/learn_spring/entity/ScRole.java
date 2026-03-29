@@ -7,6 +7,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Table(name="SC_ROLE")
 @Data
@@ -22,4 +25,7 @@ public class ScRole {
 
     @Column(name = "NAME", unique = true, nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "role", fetch = FetchType.LAZY)
+    private Set<ScRolePermission> rolePermissions = new HashSet<>();
 }

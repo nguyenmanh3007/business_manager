@@ -9,6 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
@@ -50,12 +51,12 @@ public class ScUser {
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime createdDate;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name="UPDATED_DATE", updatable = false)
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime updatedDate;
 
-    @CreationTimestamp
+    @UpdateTimestamp
     @Column(name="LAST_LOGIN", updatable = false)
     @JsonFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     private LocalDateTime lastLogin;
