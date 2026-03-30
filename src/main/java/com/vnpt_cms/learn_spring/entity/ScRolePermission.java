@@ -1,10 +1,7 @@
 package com.vnpt_cms.learn_spring.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 @Entity
@@ -14,12 +11,15 @@ import org.hibernate.annotations.UuidGenerator;
                 @UniqueConstraint(columnNames = {"ROLE_ID", "PERMISSION_ID"})
         }
 )
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScRolePermission {
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue
     @UuidGenerator
     @Column(length = 36, nullable = false, updatable = false)

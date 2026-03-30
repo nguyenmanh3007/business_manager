@@ -1,10 +1,7 @@
 package com.vnpt_cms.learn_spring.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.HashSet;
@@ -12,12 +9,15 @@ import java.util.Set;
 
 @Entity
 @Table(name="SC_ROLE")
-@Data
+@Getter
+@Setter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 public class ScRole {
     @Id
+    @EqualsAndHashCode.Include
     @GeneratedValue
     @UuidGenerator
     @Column(length = 36, nullable = false, updatable = false)

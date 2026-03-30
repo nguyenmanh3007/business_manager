@@ -13,7 +13,7 @@ spring:
 
 app:
   jwt:
-    secret: business_manager2026
+    secret: secret_key_business_manager2026_0325257006
     expiration-ms: 86400000
 
 
