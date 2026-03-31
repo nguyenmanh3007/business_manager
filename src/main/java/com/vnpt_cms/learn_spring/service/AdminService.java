@@ -10,8 +10,10 @@ import com.vnpt_cms.learn_spring.repository.ScUserRoleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +23,7 @@ public class AdminService {
     private final ScUserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional(rollbackFor = Exception.class)
     public Map<String, String> createUser(CreateUserRequest request) {
         if (userRepository.existsByUserName(request.getUsername())) {
             throw new IllegalArgumentException("Username đã tồn tại");
@@ -29,9 +32,13 @@ public class AdminService {
             throw new IllegalArgumentException("Email đã tồn tại");
         }
 
-        ScRole role = roleRepository.findByName(request.getRoleName())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        "Role không tồn tại: " + request.getRoleName()));
+        List<ScRole> roles = roleRepository.findByNameIn(request.getRoleNames());
+        List<String> foundRoleNames = roles.stream().map(ScRole::getName).toList();
+        List<String> notFoundRoles = request.getRoleNames().stream().filter(name -> !foundRoleNames.contains(name)).toList();
+        if (!notFoundRoles.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Role không tồn tại: " + String.join(", ", notFoundRoles));
+        }
 
         ScUser user = ScUser.builder()
                 .employeeCode(request.getEmployeeCode())
@@ -40,19 +47,20 @@ public class AdminService {
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .build();
-
         userRepository.save(user);
 
-        ScUserRole userRole = ScUserRole.builder()
-                .user(user)
-                .role(role)
-                .build();
-        userRoleRepository.save(userRole);
+        List<ScUserRole> userRoles = roles.stream()
+                .map(role -> ScUserRole.builder()
+                        .user(user)
+                        .role(role)
+                        .build())
+                .collect(Collectors.toList());
+        userRoleRepository.saveAll(userRoles);
 
         return Map.of(
                 "message", "Tạo user thành công",
                 "username", user.getUserName(),
-                "role", role.getName()
+                "roles", String.join(", ", request.getRoleNames())
         );
     }
 }

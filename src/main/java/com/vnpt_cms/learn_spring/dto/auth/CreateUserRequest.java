@@ -2,8 +2,11 @@ package com.vnpt_cms.learn_spring.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
+
+import java.util.List;
 
 @Data
 public class CreateUserRequest {
@@ -24,6 +27,6 @@ public class CreateUserRequest {
 
     private String phone;
 
-    @NotBlank(message = "roleName không được trống (ADMIN hoặc EMPLOYEE)")
-    private String roleName;
+    @NotEmpty(message = "Vui lòng truyền ít nhất 1 role")
+    private List<String> roleNames;
 }
