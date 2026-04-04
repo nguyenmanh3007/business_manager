@@ -1,8 +1,10 @@
 package com.vnpt_cms.learn_spring.service;
 
-import com.vnpt_cms.learn_spring.dto.auth.JwtResponse;
-import com.vnpt_cms.learn_spring.dto.auth.LoginRequest;
-import com.vnpt_cms.learn_spring.dto.auth.RegisterRequest;
+import com.vnpt_cms.learn_spring.dto.auth.response.JwtResponse;
+import com.vnpt_cms.learn_spring.dto.auth.request.LoginRequest;
+import com.vnpt_cms.learn_spring.dto.auth.request.RegisterRequest;
+import com.vnpt_cms.learn_spring.dto.auth.response.RefreshTokenResponse;
+import com.vnpt_cms.learn_spring.entity.RefreshToken;
 import com.vnpt_cms.learn_spring.entity.ScRole;
 import com.vnpt_cms.learn_spring.entity.ScUser;
 import com.vnpt_cms.learn_spring.entity.ScUserRole;
@@ -33,6 +35,7 @@ public class AuthService {
     private final ScRoleRepository roleRepository;
     private final ScUserRoleRepository userRoleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final RefreshTokenService refreshTokenService;
 
     public JwtResponse login(LoginRequest request) {
         Authentication authentication = authenticationManager.authenticate(
@@ -44,16 +47,18 @@ public class AuthService {
 
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        userRepository.findByUserName(request.getUsername()).ifPresent(user -> {
-            user.setLastLogin(LocalDateTime.now());
-            userRepository.save(user);
-        });
+        ScUser user = userRepository.findByUserName(request.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        user.setLastLogin(LocalDateTime.now());
+        userRepository.save(user);
 
         String jwt = jwtUtils.generateToken(request.getUsername());
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
+        RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
         return JwtResponse.builder()
                 .token(jwt)
+                .refreshToken(refreshToken.getToken())
                 .username(userDetails.getUsername())
                 .roles(userDetails.getAuthorities().stream()
                         .map(GrantedAuthority::getAuthority)
@@ -90,4 +95,16 @@ public class AuthService {
 
         return Map.of("message", "Đăng ký thành công");
     }
+
+    public RefreshTokenResponse refreshToken(String refreshToken) {
+        RefreshToken token = refreshTokenService.verifyToken(refreshToken);
+        ScUser user = userRepository.findById(token.getUserId())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String newAccessToken = jwtUtils.generateToken(user.getUserName());
+        refreshTokenService.revokeToken(refreshToken);
+        RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
+
+        return new RefreshTokenResponse(newAccessToken, newRefreshToken.getToken());
+    }
+
 }

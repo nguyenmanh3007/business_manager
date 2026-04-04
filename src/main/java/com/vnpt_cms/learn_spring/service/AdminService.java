@@ -1,6 +1,6 @@
 package com.vnpt_cms.learn_spring.service;
 
-import com.vnpt_cms.learn_spring.dto.auth.CreateUserRequest;
+import com.vnpt_cms.learn_spring.dto.auth.request.CreateUserRequest;
 import com.vnpt_cms.learn_spring.entity.ScRole;
 import com.vnpt_cms.learn_spring.entity.ScUser;
 import com.vnpt_cms.learn_spring.entity.ScUserRole;

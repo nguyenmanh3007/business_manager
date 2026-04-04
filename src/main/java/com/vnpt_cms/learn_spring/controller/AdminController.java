@@ -1,6 +1,6 @@
 package com.vnpt_cms.learn_spring.controller;
 
-import com.vnpt_cms.learn_spring.dto.auth.CreateUserRequest;
+import com.vnpt_cms.learn_spring.dto.auth.request.CreateUserRequest;
 import com.vnpt_cms.learn_spring.service.AdminService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
