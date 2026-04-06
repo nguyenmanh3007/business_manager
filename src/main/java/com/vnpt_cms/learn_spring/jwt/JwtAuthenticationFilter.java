@@ -1,5 +1,6 @@
 package com.vnpt_cms.learn_spring.jwt;
 
+import com.vnpt_cms.learn_spring.repository.ScUserSessionRepository;
 import com.vnpt_cms.learn_spring.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -24,6 +25,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtUtils jwtUtils;
     private final CustomUserDetailsService userDetailsService;
+    private final ScUserSessionRepository scUserSessionRepository;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,

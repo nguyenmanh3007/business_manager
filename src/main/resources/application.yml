@@ -8,13 +8,18 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 app:
   jwt:
     secret: secret_key_business_manager2026_0325257006
     expiration-ms: 86400000
+    refresh-expiration: 86400000
 
 
 springdoc:

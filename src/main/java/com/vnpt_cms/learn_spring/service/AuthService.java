@@ -4,14 +4,12 @@ import com.vnpt_cms.learn_spring.dto.auth.response.JwtResponse;
 import com.vnpt_cms.learn_spring.dto.auth.request.LoginRequest;
 import com.vnpt_cms.learn_spring.dto.auth.request.RegisterRequest;
 import com.vnpt_cms.learn_spring.dto.auth.response.RefreshTokenResponse;
-import com.vnpt_cms.learn_spring.entity.RefreshToken;
-import com.vnpt_cms.learn_spring.entity.ScRole;
-import com.vnpt_cms.learn_spring.entity.ScUser;
-import com.vnpt_cms.learn_spring.entity.ScUserRole;
+import com.vnpt_cms.learn_spring.entity.*;
 import com.vnpt_cms.learn_spring.jwt.JwtUtils;
 import com.vnpt_cms.learn_spring.repository.ScRoleRepository;
 import com.vnpt_cms.learn_spring.repository.ScUserRepository;
 import com.vnpt_cms.learn_spring.repository.ScUserRoleRepository;
+import com.vnpt_cms.learn_spring.repository.ScUserSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -34,6 +32,7 @@ public class AuthService {
     private final ScUserRepository userRepository;
     private final ScRoleRepository roleRepository;
     private final ScUserRoleRepository userRoleRepository;
+    private final ScUserSessionRepository scUserSessionRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
 
@@ -55,6 +54,14 @@ public class AuthService {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(user);
+
+        ScUserSession scUserSession = ScUserSession.builder()
+                .id(jwt)
+                .userId(user.getId())
+                .expiredTime(864000L)
+                .build();
+        scUserSessionRepository.save(scUserSession);
+
 
         return JwtResponse.builder()
                 .token(jwt)
