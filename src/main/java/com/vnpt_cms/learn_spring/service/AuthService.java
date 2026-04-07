@@ -12,6 +12,7 @@ import com.vnpt_cms.learn_spring.repository.ScUserRoleRepository;
 import com.vnpt_cms.learn_spring.repository.ScUserSessionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +60,7 @@ public class AuthService {
         ScUserSession scUserSession = ScUserSession.builder()
                 .id(jwt)
                 .userId(user.getId())
-                .expiredTime(864000L)
+                .expiredTime(900L)
                 .build();
         scUserSessionRepository.save(scUserSession);
 
@@ -112,6 +114,24 @@ public class AuthService {
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user);
 
         return new RefreshTokenResponse(newAccessToken, newRefreshToken.getToken());
+    }
+
+    public void logout(String bearerToken) {
+        try {
+            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+                throw new BadCredentialsException("Invalid Authorization header format");
+            }
+
+            String jwt = bearerToken.substring(7);
+
+            if (scUserSessionRepository.existsById(jwt)) {
+                scUserSessionRepository.deleteById(jwt);
+            } else {
+                throw new NoSuchElementException("Session not found or already expired");
+            }
+        } catch (Exception e) {
+            throw e;
+        }
     }
 
 }

@@ -8,10 +8,12 @@ import com.vnpt_cms.learn_spring.dto.auth.response.RefreshTokenResponse;
 import com.vnpt_cms.learn_spring.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.Map;
 
 @RestController
@@ -34,5 +36,11 @@ public class AuthController {
     @PostMapping("/refresh-token")
     public ResponseEntity<RefreshTokenResponse> refreshToken(@Valid @RequestBody RefreshTokenRequest request) {
         return ResponseEntity.ok(authService.refreshToken(request.getRefreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+        authService.logout(token);
+        return ResponseEntity.ok(Collections.singletonMap("message", "Logged out successfully"));
     }
 }

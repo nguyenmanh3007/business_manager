@@ -1,5 +1,6 @@
 package com.vnpt_cms.learn_spring.jwt;
 
+import com.vnpt_cms.learn_spring.entity.ScUserSession;
 import com.vnpt_cms.learn_spring.repository.ScUserSessionRepository;
 import com.vnpt_cms.learn_spring.service.CustomUserDetailsService;
 import jakarta.servlet.FilterChain;
@@ -18,6 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
@@ -36,19 +38,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = extractToken(request);
 
         if (token != null && jwtUtils.validateToken(token)) {
-            String username = jwtUtils.extractUsername(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userDetails,
-                            null,
-                            userDetails.getAuthorities()
-                    );
-            authentication.setDetails(
-                    new WebAuthenticationDetailsSource().buildDetails(request)
-            );
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            Optional<ScUserSession> session = scUserSessionRepository.findById(token);
+
+            if (session.isPresent()) {
+                String username = jwtUtils.extractUsername(token);
+                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+                UsernamePasswordAuthenticationToken authentication =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
+                authentication.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request)
+                );
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } else {
+                sendErrorResponse(response, "Invalid or expired session.");
+                return;
+            }
         }
 
         chain.doFilter(request, response);
@@ -60,5 +70,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return header.substring(7);
         }
         return null;
+    }
+
+    private void sendErrorResponse(HttpServletResponse response, String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write("{\"error\": \"" + message + "\"}");
     }
 }
