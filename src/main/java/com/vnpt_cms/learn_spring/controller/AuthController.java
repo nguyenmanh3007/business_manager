@@ -1,5 +1,6 @@
 package com.vnpt_cms.learn_spring.controller;
 
+import com.vnpt_cms.learn_spring.dto.auth.request.LogoutRequest;
 import com.vnpt_cms.learn_spring.dto.auth.request.RefreshTokenRequest;
 import com.vnpt_cms.learn_spring.dto.auth.response.JwtResponse;
 import com.vnpt_cms.learn_spring.dto.auth.request.LoginRequest;
@@ -39,8 +40,9 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, String>> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
-        authService.logout(token);
+    public ResponseEntity<Map<String, String>> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String token,
+                                                      @RequestBody(required = false) LogoutRequest logoutRequest) {
+        authService.logout(token, logoutRequest != null ? logoutRequest.getRefreshToken() : null);
         return ResponseEntity.ok(Collections.singletonMap("message", "Logged out successfully"));
     }
 }

@@ -6,10 +6,7 @@ import com.vnpt_cms.learn_spring.dto.auth.request.RegisterRequest;
 import com.vnpt_cms.learn_spring.dto.auth.response.RefreshTokenResponse;
 import com.vnpt_cms.learn_spring.entity.*;
 import com.vnpt_cms.learn_spring.jwt.JwtUtils;
-import com.vnpt_cms.learn_spring.repository.ScRoleRepository;
-import com.vnpt_cms.learn_spring.repository.ScUserRepository;
-import com.vnpt_cms.learn_spring.repository.ScUserRoleRepository;
-import com.vnpt_cms.learn_spring.repository.ScUserSessionRepository;
+import com.vnpt_cms.learn_spring.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,6 +32,7 @@ public class AuthService {
     private final ScRoleRepository roleRepository;
     private final ScUserRoleRepository userRoleRepository;
     private final ScUserSessionRepository scUserSessionRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenService refreshTokenService;
 
@@ -116,21 +114,18 @@ public class AuthService {
         return new RefreshTokenResponse(newAccessToken, newRefreshToken.getToken());
     }
 
-    public void logout(String bearerToken) {
-        try {
-            if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
-                throw new BadCredentialsException("Invalid Authorization header format");
-            }
+    public void logout(String bearerToken, String refreshToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
+            throw new BadCredentialsException("Invalid Authorization header format");
+        }
 
-            String jwt = bearerToken.substring(7);
+        String jwt = bearerToken.substring(7);
 
-            if (scUserSessionRepository.existsById(jwt)) {
-                scUserSessionRepository.deleteById(jwt);
-            } else {
-                throw new NoSuchElementException("Session not found or already expired");
-            }
-        } catch (Exception e) {
-            throw e;
+        if (scUserSessionRepository.existsById(jwt)) {
+            scUserSessionRepository.deleteById(jwt);
+            refreshTokenService.revokeToken(refreshToken);
+        } else {
+            throw new NoSuchElementException("Session not found or already expired");
         }
     }
 
